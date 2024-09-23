@@ -1,17 +1,43 @@
 "use client";
-// app/(auth)/login/page.tsx
 import { useState } from "react";
+import { z } from "zod";
 
 export default function LoginPage() {
   const [step, setStep] = useState(1); // Step 1: Login, Step 2: OTP
+  const [error, setError] = useState("");
+  const [username, setUsername] = useState("");
+  const usernameSchema = z.string().regex(/^09[0-9]{9}$/);
 
-  // Function to handle login submit (e.g., send OTP)
-  const handleLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate sending OTP (in real case, integrate with SMS API like Twilio)
-    setStep(2); // Move to OTP step
+  const handleUsernameInput = (inputValue: string) => {
+    setUsername(inputValue); // Update the username state with the input value
+
+    if (inputValue.length === 0) {
+      // Show error if input is empty
+      setError("لطفا شماره تلفن خود را وارد کنید");
+    } else if (inputValue.length === 11) {
+      // Validate the phone number only when the input has 11 characters
+      try {
+        usernameSchema.parse(inputValue);
+        setError(""); // Clear error if valid
+      } catch (error) {
+        setError("شماره تلفن باید با 09 آغاز شود.");
+      }
+    } else {
+      setError(""); // Clear the error message while the user is typing
+    }
   };
 
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (username.length === 0) {
+      // If input is empty, show custom error
+      setError("لطفا شماره تلفن خود را وارد کنید");
+    } else if (error === "") {
+      // Proceed to the next step if no errors
+      setStep(2);
+    }
+  };
   const handleOTPSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulate OTP verification (real case would verify against backend)
@@ -28,21 +54,33 @@ export default function LoginPage() {
             </h2>
             <form className="space-y-6" onSubmit={handleLoginSubmit}>
               <div>
-              <label
+                <label
                   htmlFor="username"
                   className="block text-sm font-medium text-gray-700 text-right"
                 >
-                  برای <strong className="text-blue-500">ورود</strong> یا <strong className="text-blue-500">ثبت‌ نام</strong> شماره تلفن همراه خود را وارد کنید
+                  برای <strong className="text-blue-500">ورود</strong> یا{" "}
+                  <strong className="text-blue-500">ثبت‌ نام</strong> شماره تلفن
+                  همراه خود را وارد کنید
                 </label>
                 <input
                   id="username"
                   name="username"
                   type="text"
                   placeholder="۰۹*********"
-                  required
                   dir="ltr"
+                  inputMode="numeric"
+                  pattern="09[0-9]{9}"
+                  maxLength={11}
+                  value={username}
+                  onChange={(event) => handleUsernameInput(event.target.value)}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+                  onKeyPress={(event) => {
+                    if (!/\d/.test(event.key)) {
+                      event.preventDefault();
+                    }
+                  }}
                 />
+                {error && <div style={{ color: "red" }}>{error}</div>}
               </div>
 
               <button
@@ -66,7 +104,7 @@ export default function LoginPage() {
                   htmlFor="otp"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  کد دو مرحله ای را وارد کیند
+                  کد دو مرحله ای را وارد کنید
                 </label>
                 <input
                   id="otp"
@@ -79,9 +117,17 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 بررسی
+              </button>
+
+              {/* Add a back button to go to step 1 */}
+              <button
+                className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-sky-700 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                onClick={() => setStep(1)}
+              >
+                ویرایش شماره تلفن{" "}
               </button>
             </form>
           </>
