@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 export default function LoginPage() {
@@ -7,6 +7,33 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
   const usernameSchema = z.string().regex(/^09[0-9]{9}$/);
+  // Add a new state to store the remaining time
+  const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes
+  const [timerRunning, setTimerRunning] = useState(false);
+
+  // Create a function to format the time
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+  // Update the timerRunning state when step changes to 2
+  useEffect(() => {
+    if (step === 2) {
+      setTimerRunning(true);
+    } else {
+      setTimerRunning(false);
+    }
+  }, [step]);
+  useEffect(() => {
+    if (timerRunning) {
+      const timerId = setInterval(() => {
+        setTimeRemaining(timeRemaining - 1);
+      }, 1000);
+
+      return () => clearInterval(timerId);
+    }
+  }, [timerRunning, timeRemaining]);
 
   const handleUsernameInput = (inputValue: string) => {
     setUsername(inputValue); // Update the username state with the input value
@@ -114,7 +141,11 @@ export default function LoginPage() {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
-
+              <div className="text-center mt-4">
+                <p>
+                  زمان باقی مانده: <span id="timer">{formatTime(120)}</span>
+                </p>
+              </div>
               <button
                 type="submit"
                 className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
