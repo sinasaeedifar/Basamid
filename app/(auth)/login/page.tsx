@@ -7,17 +7,38 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
   const usernameSchema = z.string().regex(/^09[0-9]{9}$/);
-  // Add a new state to store the remaining time
   const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes
   const [timerRunning, setTimerRunning] = useState(false);
 
-  // Create a function to format the time
-  const formatTime = (time: number) => {
+  const persianToEnglishDigits = (str) => {
+    const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+    const englishDigits = "0123456789";
+    return str.replace(/[۰-۹]/g, (c) => englishDigits[persianDigits.indexOf(c)]);
+  };
+
+  const englishToPersianDigits = (str) => {
+    const englishDigits = "0123456789";
+    const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+    return str.replace(/[0-9]/g, (c) => persianDigits[englishDigits.indexOf(c)]);
+  };
+
+  const formatPersianDate = (dateStr) => {
+    dateStr = persianToEnglishDigits(dateStr);
+    const [yearMonthDay, weekday] = dateStr.split(", ");
+    const [year, month, day] = yearMonthDay.split(" ");
+    return `${weekday} ${englishToPersianDigits(day)} ${month} ${englishToPersianDigits(year)}`;
+  };
+
+  const date = new Date();
+  const formatter = new Intl.DateTimeFormat("fa-IR", { dateStyle: "full" });
+  const formattedDate = formatPersianDate(formatter.format(date));
+
+  const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return `${englishToPersianDigits(minutes.toString())}:${englishToPersianDigits(seconds.toString().padStart(2, "0"))}`;
   };
-  // Update the timerRunning state when step changes to 2
+
   useEffect(() => {
     if (step === 2) {
       setTimerRunning(true);
@@ -25,49 +46,45 @@ export default function LoginPage() {
       setTimerRunning(false);
     }
   }, [step]);
+
   useEffect(() => {
     if (timerRunning) {
       const timerId = setInterval(() => {
-        setTimeRemaining(timeRemaining - 1);
+        setTimeRemaining((prevTime) => prevTime - 1);
       }, 1000);
-
       return () => clearInterval(timerId);
     }
-  }, [timerRunning, timeRemaining]);
+  }, [timerRunning]);
 
-  const handleUsernameInput = (inputValue: string) => {
-    setUsername(inputValue); // Update the username state with the input value
+  const handleUsernameInput = (inputValue) => {
+    const englishValue = persianToEnglishDigits(inputValue);
+    setUsername(englishToPersianDigits(englishValue));
 
-    if (inputValue.length === 0) {
-      // Show error if input is empty
+    if (englishValue.length === 0) {
       setError("لطفا شماره تلفن خود را وارد کنید");
-    } else if (inputValue.length === 11) {
-      // Validate the phone number only when the input has 11 characters
+    } else if (englishValue.length === 11) {
       try {
-        usernameSchema.parse(inputValue);
-        setError(""); // Clear error if valid
+        usernameSchema.parse(englishValue);
+        setError("");
       } catch (error) {
         setError("شماره تلفن باید با 09 آغاز شود.");
       }
     } else {
-      setError(""); // Clear the error message while the user is typing
+      setError("");
     }
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
-
     if (username.length === 0) {
-      // If input is empty, show custom error
       setError("لطفا شماره تلفن خود را وارد کنید");
     } else if (error === "") {
-      // Proceed to the next step if no errors
       setStep(2);
     }
   };
-  const handleOTPSubmit = (e: React.FormEvent) => {
+
+  const handleOTPSubmit = (e) => {
     e.preventDefault();
-    // Simulate OTP verification (real case would verify against backend)
     alert("OTP Verified! Logging in...");
   };
 
@@ -76,11 +93,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 bg-white shadow-md rounded-md">
         {step === 1 && (
           <>
+            <p>{formattedDate}</p>
             <h2 className="text-2xl font-semibold text-center mb-6">
               ورود / ثبت نام
             </h2>
             <form className="space-y-6" onSubmit={handleLoginSubmit}>
-              <div>
+              <div className="space-y-4">
                 <label
                   htmlFor="username"
                   className="block text-sm font-medium text-gray-700 text-right"
@@ -96,7 +114,6 @@ export default function LoginPage() {
                   placeholder="۰۹*********"
                   dir="ltr"
                   inputMode="numeric"
-                  pattern="09[0-9]{9}"
                   maxLength={11}
                   value={username}
                   onChange={(event) => handleUsernameInput(event.target.value)}
@@ -143,7 +160,7 @@ export default function LoginPage() {
               </div>
               <div className="text-center mt-4">
                 <p>
-                  زمان باقی مانده: <span id="timer">{formatTime(120)}</span>
+                  زمان باقی مانده: <span id="timer">{formatTime(timeRemaining)}</span>
                 </p>
               </div>
               <button
@@ -152,8 +169,6 @@ export default function LoginPage() {
               >
                 بررسی
               </button>
-
-              {/* Add a back button to go to step 1 */}
               <button
                 className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-sky-700 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 onClick={() => setStep(1)}
