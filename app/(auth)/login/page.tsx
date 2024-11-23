@@ -49,12 +49,16 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (timerRunning) {
-      const timerId = setInterval(() => {
-        setTimeRemaining((prevTime) => prevTime - 1);
-      }, 1000);
-      return () => clearInterval(timerId);
+      if (timeRemaining > 0) {
+        const timerId = setInterval(() => {
+          setTimeRemaining((prevTime) => Math.max(prevTime - 1, 0));
+        }, 1000);
+        return () => clearInterval(timerId);
+      } else {
+        setTimerRunning(false); // Stop the timer when it reaches 0
+      }
     }
-  }, [timerRunning]);
+  }, [timerRunning, timeRemaining]);
 
   const handleUsernameInput = (inputValue) => {
     const englishValue = persianToEnglishDigits(inputValue);
@@ -86,6 +90,11 @@ export default function LoginPage() {
   const handleOTPSubmit = (e) => {
     e.preventDefault();
     alert("OTP Verified! Logging in...");
+  };
+
+  const handleResend = () => {
+    setTimeRemaining(120); // Reset timer
+    setTimerRunning(true); // Restart timer
   };
 
   return (
@@ -163,6 +172,17 @@ export default function LoginPage() {
                   زمان باقی مانده: <span id="timer">{formatTime(timeRemaining)}</span>
                 </p>
               </div>
+
+              {timeRemaining === 0 && (
+                <button
+                  type="button"
+                  className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  onClick={handleResend}
+                >
+                  ارسال مجدد کد
+                </button>
+              )}
+
               <button
                 type="submit"
                 className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
