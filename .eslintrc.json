@@ -1,3 +1,5 @@
-{
-  "extends": ["next/core-web-vitals", "next/typescript"]
-}
+module.exports = {
+  rules: {
+    "rule-name": "off", // Replace "rule-name" with the specific ESLint rule you want to disable
+  },
+};

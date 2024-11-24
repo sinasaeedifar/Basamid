@@ -10,16 +10,22 @@ export default function LoginPage() {
   const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes
   const [timerRunning, setTimerRunning] = useState(false);
 
-  const persianToEnglishDigits = (str) => {
+  const persianToEnglishDigits = (str: any) => {
     const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
     const englishDigits = "0123456789";
-    return str.replace(/[۰-۹]/g, (c) => englishDigits[persianDigits.indexOf(c)]);
+    return str.replace(
+      /[۰-۹]/g,
+      (c) => englishDigits[persianDigits.indexOf(c)]
+    );
   };
 
-  const englishToPersianDigits = (str) => {
+  const englishToPersianDigits = (str: any) => {
     const englishDigits = "0123456789";
     const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
-    return str.replace(/[0-9]/g, (c) => persianDigits[englishDigits.indexOf(c)]);
+    return str.replace(
+      /[0-9]/g,
+      (c) => persianDigits[englishDigits.indexOf(c)]
+    );
   };
 
   const formatPersianDate = (dateStr) => {
