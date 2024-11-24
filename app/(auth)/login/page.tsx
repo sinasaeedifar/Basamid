@@ -67,12 +67,13 @@ export default function LoginPage() {
     if (englishValue.length === 0) {
       setError("لطفا شماره تلفن خود را وارد کنید");
     } else if (englishValue.length === 11) {
-      try {
-        usernameSchema.parse(englishValue);
-        setError("");
-      } catch (error) {
-        setError("شماره تلفن باید با 09 آغاز شود.");
-      }
+      // try {
+      //   usernameSchema.parse(englishValue);
+      //   setError("");
+      // }
+      // catch (error) {
+      //   setError("شماره تلفن باید با 09 آغاز شود.");
+      // }
     } else {
       setError("");
     }
