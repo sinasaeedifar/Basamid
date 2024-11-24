@@ -6,7 +6,7 @@ export default function LoginPage() {
   const [step, setStep] = useState(1); // Step 1: Login, Step 2: OTP
   const [error, setError] = useState("");
   const [username, setUsername] = useState("");
-  const usernameSchema = z.string().regex(/^09[0-9]{9}$/);
+  // const usernameSchema = z.string().regex(/^09[0-9]{9}$/);
   const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes
   const [timerRunning, setTimerRunning] = useState(false);
 
